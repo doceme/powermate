@@ -108,17 +108,20 @@ class FileEventSource(object):
   def __iter__(self):
     data = b''
     while True:
-      data += self.__event_in.read(EVENT_SIZE)
-      if len(data) >= EVENT_SIZE:
-        event = Event.fromraw(data[:EVENT_SIZE])
-        data = data[EVENT_SIZE:]
-        try:
-          yield event
-        except EventNotImplemented:
-          pass
-        except Exception:
-          import traceback
-          traceback.print_exc()
+      try:
+        data += self.__event_in.read(EVENT_SIZE)
+        if len(data) >= EVENT_SIZE:
+          event = Event.fromraw(data[:EVENT_SIZE])
+          data = data[EVENT_SIZE:]
+          try:
+            yield event
+          except EventNotImplemented:
+            pass
+          except Exception:
+            import traceback
+            traceback.print_exc()
+      except KeyboardInterrupt:
+        break
 
   def send(self, event):
     self.__event_out.write(event.raw())
